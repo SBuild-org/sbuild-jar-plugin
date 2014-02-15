@@ -1,0 +1,53 @@
+= SBuild Jar Plugin
+:pluginversion: 0.0.9000
+:toc:
+:toc-placement: preamble
+:toclevels: 1
+
+This SBuild Plugin adds support to create JAR archives.
+
+== Download
+
+SBuild Jar Plugin can be downloaded from http://repo1.maven.org/maven2/org/sbuild/org.sbuild.plugins.jar/[Maven Central].
+
+To include it in you SBuild buildfile use the `@classpath` annotation:
+
+[source,scala,subs="attributes"]
+----
+@classpath("mvn:org.sbuild:org.sbuild.plugins.jar:{pluginversion}")
+----
+
+== Building from Source
+
+You need a recent version of SBuild.
+
+----
+git clone https://github.com/SBuild-org/sbuild-jar-plugin.git
+cd sbuild-sbuild-plugin/org.sbuild.plugins.jar
+sbuild all
+----
+
+You will find the built jar in the directory `org.sbuild.plugins.jar/target`.
+
+== Requirements
+
+This plugin requires at least SBuild 0.7.1.
+
+== Configuration
+
+All configurable properties are documented via ScalaDoc. See file link:org.sbuild.plugins.jar/src/main/scala/org/sbuild/plugins/jar/Jar.scala[`Jar.scala`].
+
+== Targets
+
+In it's default configuration, this plugin will provide the following targets:
+
+* *jar* - create the jar file
+
+If you create a named plugin instance, the generated targets are:
+
+* *jar-${name}* - create the jar file
+
+
+== Changelog
+
+=== SBuild Jar Plugin 0.1.0 - _not released yet_
