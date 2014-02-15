@@ -5,15 +5,17 @@ import java.io.File
 
 trait JarFileSet {
   def baseDir: File
-  def files: Seq[File]
+  //  def files: Seq[File]
+  def targetRefs: TargetRefs
   def prefix: String = ""
 }
 
 object JarFileSet {
-
-  case class Dir(dir: File) extends JarFileSet {
-    override def baseDir: File = dir
-    override def files: Seq[File] = dir.listFilesRecursive
+  
+  case class Dir(override val baseDir: File)(implicit project: Project) extends JarFileSet {
+    override def targetRefs: TargetRefs = s"scan:${baseDir}"
   }
+
+  case class FromTargetRefs(override val baseDir: File, override val targetRefs: TargetRefs) extends JarFileSet
 
 }

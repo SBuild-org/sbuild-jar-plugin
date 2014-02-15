@@ -18,7 +18,7 @@ import java.io.InputStream
 
 class JarCreator {
 
-  def createJar(jarFile: File, fileSets: Seq[JarFileSet], manifest: Map[String, String]): Try[File] = {
+  def createJar(jarFile: File, fileSets: Seq[(File, Seq[File])], manifest: Map[String, String]): Try[File] = {
     val m = new Manifest()
     val ma = m.getMainAttributes()
     ma.put(Attributes.Name.MANIFEST_VERSION, "1.0")
@@ -29,7 +29,7 @@ class JarCreator {
     createJar(jarFile, fileSets, m)
   }
 
-  def createJar(jarFile: File, fileSets: Seq[JarFileSet], manifest: Manifest): Try[File] = Try {
+  def createJar(jarFile: File, fileSets: Seq[(File, Seq[File])], manifest: Manifest): Try[File] = Try {
     // TODO: handle existing manifest file
     // TODO: handle multiple same resources
     // TODO: handle overwrite of jar file
@@ -37,30 +37,31 @@ class JarCreator {
     //    val createDirNodes = true
     //    var createdDirNodes: Seq[String] = Seq()
 
-    val entries: Seq[(JarEntry, Option[File])] = fileSets.flatMap { fileSet =>
-      val base = fileSet.baseDir.getPath
-      val index = base.length + 1 /* separator */
-      fileSet.files.flatMap { file =>
-        val filePath = file.getPath
-        if (!file.exists) {
-          throw new IllegalArgumentException(s"""File "${filePath}" does not exist.""")
-        }
-        if (!filePath.startsWith(base)) {
-          throw new IllegalArgumentException(s"""File "${filePath}" is not located under "${base}"""")
-        }
-        val nodePath = filePath.substring(index)
+    val entries: Seq[(JarEntry, Option[File])] = fileSets.flatMap {
+      case (baseDir, files) =>
+        val base = baseDir.getPath
+        val index = base.length + 1 /* separator */
+        files.flatMap { file =>
+          val filePath = file.getPath
+          if (!file.exists) {
+            throw new IllegalArgumentException(s"""File "${filePath}" does not exist.""")
+          }
+          if (!filePath.startsWith(base)) {
+            throw new IllegalArgumentException(s"""File "${filePath}" is not located under "${base}"""")
+          }
+          val nodePath = filePath.substring(index)
 
-        //        if(createDirNodes) {
-        //          file.getParentFile()
-        //          
-        //          
-        //        }
+          //        if(createDirNodes) {
+          //          file.getParentFile()
+          //          
+          //          
+          //        }
 
-        val entry = new JarEntry(nodePath)
-        entry.setTime(file.lastModified)
-        val streamable = if (file.isDirectory) None else Some(file)
-        Seq(entry -> streamable)
-      }
+          val entry = new JarEntry(nodePath)
+          entry.setTime(file.lastModified)
+          val streamable = if (file.isDirectory) None else Some(file)
+          Seq(entry -> streamable)
+        }
     }
 
     val explicitManifests = entries.filter { case (entry, _) => entry == "META-INF/MANIFEST.MF" }

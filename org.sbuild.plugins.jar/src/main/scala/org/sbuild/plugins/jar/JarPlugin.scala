@@ -1,12 +1,7 @@
 package org.sbuild.plugins.jar
 
-import de.tototec.sbuild.Path
-import de.tototec.sbuild.Plugin
-import de.tototec.sbuild.Project
-import de.tototec.sbuild.Target
-import de.tototec.sbuild.TargetRef.fromString
+import de.tototec.sbuild._
 import de.tototec.sbuild.addons.support.ForkSupport
-import de.tototec.sbuild.toRichFile
 import org.sbuild.plugins.jar.internal.JarCreator
 import scala.util.Success
 import scala.util.Failure
@@ -31,7 +26,7 @@ class JarPlugin(implicit project: Project) extends Plugin[Jar] {
             JarFileSet.Dir(Path("src/test/resources"))
           )
         )
-      case x => (targetDir / "${x}.jar", Seq())
+      case x => (targetDir / s"${x}.jar", Seq())
     }
 
     Jar(
@@ -43,14 +38,19 @@ class JarPlugin(implicit project: Project) extends Plugin[Jar] {
 
   override def applyToProject(instances: Seq[(String, Jar)]): Unit = instances foreach {
     case (name, jar) =>
-      
-      Target(jar.jarFile) exec {
-    	  new JarCreator().createJar(jar.jarFile, jar.fileSets, jar.manifest) match {
-    	    case Success(_) => 
-    	    case Failure(e) => throw e
-    	  }
+
+      Target(jar.jarFile) dependsOn jar.fileSets.foldLeft(TargetRefs())((l, r) => l ~ r.targetRefs) exec {
+        new JarCreator().createJar(
+          jarFile = jar.jarFile,
+          fileSets = jar.fileSets.map { fs =>
+            fs.baseDir -> fs.targetRefs.files
+          },
+          manifest = jar.manifest) match {
+            case Success(_) =>
+            case Failure(e) => throw e
+          }
       }
 
   }
-  
+
 }
