@@ -39,14 +39,10 @@ All configurable properties are documented via ScalaDoc. See file link:org.sbuil
 
 == Targets
 
-In it's default configuration, this plugin will provide the following targets:
+In it's default configuration, this plugin will provides a file target producing the JAR file and a phony target `jar`, which is a placeholder to that file target.
+In non-default plugin instances with a name other than `""` or `"main"`, no extra phony target will be created.
 
-* *jar* - create the jar file
-
-If you create a named plugin instance, the generated targets are:
-
-* *jar-${name}* - create the jar file
-
+You can always overwrite the creation of the additional phony target with the `Jar.phonyTarget` property.
 
 == Changelog
 
